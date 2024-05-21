@@ -35,7 +35,7 @@ const CartPage = () => {
     } else {
       // Encode the server key in base64 format
       const base64ServerKey = Buffer.from("SB-Mid-server-Yb5on11GDySP2wsM8kz59PlO").toString("base64");
-
+      // SB - =Mid - server - Yb5on11GDySP2wsM8kz59PlO;
       try {
         const resp = await fetch("http://localhost:3000/api/orders", {
           method: "POST",
@@ -73,8 +73,8 @@ const CartPage = () => {
           },
           // Add additional payload as required by Midtrans API
         };
-
-        const res = await fetch("https://api.sandbox.midtrans.com/v1/payment-links", {
+        // https://api.sandbox.midtrans.com/v1/payment-links
+        const res = await fetch("https://api.midtrans.com/v1/payment-links", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
