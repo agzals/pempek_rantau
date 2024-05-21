@@ -4,6 +4,7 @@ import { ProductType } from "@/types/types";
 import { useCartStore } from "@/utils/store";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
+import { formatToRupiah } from "@/utils/formatToRupiah";
 
 const Price = ({ product }: { product: ProductType }) => {
   const [total, setTotal] = useState(product.price);
@@ -26,7 +27,7 @@ const Price = ({ product }: { product: ProductType }) => {
 
   return (
     <div className="flex flex-col gap-4">
-      <h2 className="text-2xl font-bold">${total}</h2>
+      <h2 className="text-2xl font-bold">{formatToRupiah(total)}</h2>
       {/* QUANTITY AND ADD BUTTON CONTAINER */}
       <div className="flex justify-between items-center">
         {/* QUANTITY */}

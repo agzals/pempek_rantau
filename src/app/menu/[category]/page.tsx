@@ -3,6 +3,11 @@ import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 
+// Fungsi formatToRupiah
+const formatToRupiah = (amount: number) => {
+  return amount.toLocaleString("id-ID", { style: "currency", currency: "IDR" });
+};
+
 const getData = async (category: string) => {
   const res = await fetch(`http://localhost:3000/api/products?cat=${category}`, {
     cache: "no-store",
@@ -28,13 +33,13 @@ const CategoryPage = async ({ params }: Props) => {
           {/* IMAGE CONTAINER */}
           {item.img && (
             <div className="relative h-[80%]">
-              <Image src={item.img} alt="" fill className="object-contain" />
+              <Image src={item.img} alt={item.title} fill className="object-contain" />
             </div>
           )}
           {/* TEXT CONTAINER */}
           <div className="flex items-center justify-between font-bold">
             <h1 className="text-2xl uppercase p-2">{item.title}</h1>
-            <h2 className="group-hover:hidden text-xl">${item.price}</h2>
+            <h2 className="group-hover:hidden text-xl">{formatToRupiah(item.price)}</h2>
             <button className="hidden group-hover:block uppercase bg-red-500 text-white p-2 rounded-md">Add to Cart</button>
           </div>
         </Link>
