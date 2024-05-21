@@ -36,9 +36,9 @@ const CartPage = () => {
       // Encode the server key in base64 format
       const base64ServerKey = Buffer.from("SB-Mid-server-Yb5on11GDySP2wsM8kz59PlO").toString("base64");
       // SB-Mid-server-Yb5on11GDySP2wsM8kz59PlO
-
+      // http:localhost:3000/api/orders
       try {
-        const resp = await fetch("http://localhost:3000/api/orders", {
+        const resp = await fetch("https://pempek-rantau.vercel.app/api/orders", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({

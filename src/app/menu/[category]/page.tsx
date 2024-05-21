@@ -9,7 +9,7 @@ const formatToRupiah = (amount: number) => {
 };
 
 const getData = async (category: string) => {
-  const res = await fetch(`http://localhost:3000/api/products?cat=${category}`, {
+  const res = await fetch(`https://pempek-rantau.vercel.app/api/products?cat=${category}`, {
     cache: "no-store",
   });
 
