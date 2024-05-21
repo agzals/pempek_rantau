@@ -34,8 +34,8 @@ const CartPage = () => {
       router.push("/");
     } else {
       // Encode the server key in base64 format
-      const base64ServerKey = Buffer.from("SB-Mid-server-Yb5on11GDySP2wsM8kz59PlO").toString("base64");
-      // SB - =Mid - server - Yb5on11GDySP2wsM8kz59PlO;
+      const base64ServerKey = Buffer.from("Mid-server-G_9j6MMxm8BXPXbD2WPbUGca").toString("base64");
+      // SB-Mid-server-Yb5on11GDySP2wsM8kz59PlO
       try {
         const resp = await fetch("http://localhost:3000/api/orders", {
           method: "POST",
