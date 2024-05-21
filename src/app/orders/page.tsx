@@ -19,14 +19,14 @@ const OrdersPage = () => {
 
   const { isLoading, error, data } = useQuery({
     queryKey: ["orders"],
-    queryFn: () => fetch("https://pempek-rantau.vercel.app/api/orders").then((res) => res.json()),
+    queryFn: () => fetch("https://pempekrantau.vercel.app/api/orders").then((res) => res.json()),
   });
 
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
     mutationFn: ({ id, status }: { id: string; status: string }) => {
-      return fetch(`https://pempek-rantau.vercel.app/api/orders/${id}`, {
+      return fetch(`https://pempekrantau.vercel.app/api/orders/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

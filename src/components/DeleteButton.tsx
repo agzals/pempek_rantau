@@ -17,7 +17,7 @@ const DeleteButton = ({ id }: { id: string }) => {
   }
 
   const handleDelete = async () => {
-    const res = await fetch(`https://pempek-rantau.vercel.app/api/products/${id}`, {
+    const res = await fetch(`https://pempekrantau.vercel.app/api/products/${id}`, {
       method: "DELETE",
     });
 

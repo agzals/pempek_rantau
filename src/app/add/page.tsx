@@ -54,7 +54,7 @@ const AddPage = () => {
     try {
       const url = await upload();
       // http://localhost:3000/api/products
-      const res = await fetch("https://pempek-rantau.vercel.app/api/products", {
+      const res = await fetch("https://pempekrantau.vercel.app/api/products", {
         method: "POST",
         body: JSON.stringify({
           img: url,
