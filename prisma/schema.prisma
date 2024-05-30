@@ -53,8 +53,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
   Order         Order[]
-
-    @@map("users")
+  @@map("users")
 }
  
 model VerificationToken {
@@ -85,6 +84,7 @@ model Product {
   isFeatured Boolean  @default(false)
   category   Category @relation(fields: [catSlug], references: [slug])
   catSlug    String
+  stock      Int      @default(0)
 }
 
 model Order {
@@ -97,6 +97,7 @@ model Order {
   products  Json[]
   status    String
   intent_id String?  @unique
+  trackingNumber String?
   user User @relation(fields: [userEmail], references: [email])
   userEmail String
 }

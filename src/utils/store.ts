@@ -48,7 +48,16 @@ export const useCartStore = create(
           totalPrice: state.totalPrice - item.price,
         }));
       },
+      clearCart: () => set(INITIAL_STATE), // Tambahkan fungsi untuk membersihkan keranjang
     }),
-    { name: "Cart", skipHydration: true }
+    {
+      name: "Cart",
+      skipHydration: true,
+    }
   )
 );
+
+// Fungsi untuk menghapus data yang disimpan di local storage oleh Zustand
+// export const clearStorage = () => {
+//   useCartStore.persist.clearStorage();
+// };

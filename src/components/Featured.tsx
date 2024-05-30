@@ -17,12 +17,12 @@ const getData = async () => {
 const Featured = async () => {
   const featuredProducts: ProductType[] = await getData();
   return (
-    <div className="w-screen overflow-x-scroll text-red-500">
+    <div className="w-screen overflow-x-scroll bg-gray-100 text-gray-800">
       {/*WRAPPER*/}
       <div className="w-max flex">
         {/*SINGLE ITEM*/}
         {featuredProducts.map((item) => (
-          <div key={item.id} className="w-screen h-[60vh] flex flex-col items-center justify-around p-4 hover:bg-fuchsia-50 transition-all duration-300 md:w-[50vw] xl:w-[33vw] xl:h-[90vh]">
+          <div key={item.id} className="w-screen h-[60vh] flex flex-col items-center justify-around p-4 hover:bg-gray-200 transition-all duration-300 md:w-[50vw] xl:w-[33vw] xl:h-[90vh]">
             {/* IMAGE CONTAINER */}
             {item.img && (
               <div className="relative flex-1 w-60 hover:rotate-[60deg] transition-all duration-500">
@@ -35,7 +35,7 @@ const Featured = async () => {
               <h1 className="text-xl font-bold uppercase xl:text-l 2xl:text-xl">{item.title}</h1>
               <p className="text-sm p-4 2xl:p-8">{item.desc}</p>
               <span className="text-l font-bold">Rp.{item.price}</span>
-              <button className="bg-red-500 w-50 text-white text-sm p-2 rounded-md">Add to Cart</button>
+              <button className="bg-gray-800 w-50 text-white text-sm p-2 rounded-md">Add to Cart</button>
             </div>
           </div>
         ))}

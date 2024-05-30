@@ -31,7 +31,7 @@ const Price = ({ product }: { product: ProductType }) => {
       {/* QUANTITY AND ADD BUTTON CONTAINER */}
       <div className="flex justify-between items-center">
         {/* QUANTITY */}
-        <div className="flex justify-between w-full p-3 ring-1 ring-red-500">
+        <div className="flex justify-between w-full p-3 ring-1 ring-gray-800">
           <span>Quantity</span>
           <div className="flex gap-4 items-center">
             <button onClick={() => setQuantity((prev) => (prev > 1 ? prev - 1 : 1))}>{"<"}</button>
@@ -40,7 +40,7 @@ const Price = ({ product }: { product: ProductType }) => {
           </div>
         </div>
         {/* CART BUTTON */}
-        <button className="uppercase w-56 bg-red-500 text-white p-3 ring-1 ring-red-500" onClick={handleCart}>
+        <button className="uppercase w-56 bg-gray-800 text-white p-3 ring-1 ring-gray-800" onClick={handleCart}>
           Add to Cart
         </button>
       </div>

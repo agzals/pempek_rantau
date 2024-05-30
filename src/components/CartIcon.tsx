@@ -7,6 +7,7 @@ import React, { useEffect } from "react";
 const CartIcon = () => {
   const { totalItems } = useCartStore();
   useEffect(() => {
+    // localStorage.removeItem("Cart")
     useCartStore.persist.rehydrate();
   }, []);
   return (

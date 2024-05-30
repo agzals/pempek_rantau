@@ -1,24 +1,55 @@
+"use client";
 import DeleteButton from "@/components/DeleteButton";
 import Price from "@/components/Price";
 import { ProductType } from "@/types/types";
 import Image from "next/image";
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
-const getData = async (id: string) => {
-  const res = await fetch(`https://pempekrantau.vercel.app/api/products/${id}`, {
-    cache: "no-store",
-  });
+const SingleProductPage = ({ params }: { params: { id: string } }) => {
+  const [singleProduct, setSingleProduct] = useState<ProductType | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const { data: session, status } = useSession();
+  const router = useRouter();
 
-  if (!res.ok) {
-    throw new Error("Failed!");
+  useEffect(() => {
+    const getData = async (id: string) => {
+      try {
+        const res = await fetch(`https://pempekrantau.vercel.app/api/products/${id}`, {
+          cache: "no-store",
+        });
+
+        if (!res.ok) {
+          throw new Error("Failed!");
+        }
+
+        const data = await res.json();
+        setSingleProduct(data);
+        setLoading(false);
+      } catch (error) {
+        console.error(error);
+        setLoading(false);
+      }
+    };
+
+    getData(params.id);
+  }, [params.id]);
+
+  const handleAddProductClick = () => {
+    router.push("/add");
+  };
+
+  if (loading) {
+    return <p>Loading...</p>;
   }
 
-  return res.json();
-};
-const SingleProductPage = async ({ params }: { params: { id: string } }) => {
-  const singleProduct: ProductType = await getData(params.id);
+  if (!singleProduct) {
+    return <p>Product not found</p>;
+  }
+
   return (
-    <div className="p-4 lg:px-20 xl:px-40 h-screen flex flex-col justify-around text-red-500 md:flex-row md:gap-8 md:items-center">
+    <div className="p-4 lg:px-20 xl:px-40 h-screen flex flex-col justify-around text-gray-800 md:flex-row md:gap-8 md:items-center">
       {/* IMAGE CONTAINER */}
       {singleProduct.img && (
         <div className="relative w-full h-1/2 md:h-[70%]">
@@ -30,6 +61,12 @@ const SingleProductPage = async ({ params }: { params: { id: string } }) => {
         <h1 className="text-3xl font-bold uppercase xl:text-5xl">{singleProduct.title}</h1>
         <p>{singleProduct.desc}</p>
         <Price product={singleProduct} />
+        <p className="text-xl font-semibold">Stock: {singleProduct.stock > 0 ? <span className="text-green-500">Tersedia</span> : <span className="text-red-500">Habis</span>}</p>
+        {status === "authenticated" && session?.user.isAdmin && (
+          <button onClick={handleAddProductClick} className="p-2 bg-red-500 text-white rounded">
+            Tambah Produk Baru
+          </button>
+        )}
       </div>
       <DeleteButton id={singleProduct.id} />
     </div>

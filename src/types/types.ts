@@ -12,6 +12,7 @@ export type ProductType = {
   desc?: string;
   img?: string;
   price: number;
+  stock: number;
 };
 
 export type OrderType = {
@@ -25,6 +26,7 @@ export type OrderType = {
   status: String;
   createdAt: Date;
   intent_id?: String;
+  trackingNumber?: string;
 };
 
 export type CartItemType = {
