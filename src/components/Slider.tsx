@@ -12,7 +12,7 @@ const data = [
   {
     id: 2,
     title: "Sedap",
-    image: "/slide1.jpg",
+    image: "/temporary/banner_sedap.png",
   },
   {
     id: 3,

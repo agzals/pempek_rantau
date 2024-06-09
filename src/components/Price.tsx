@@ -22,7 +22,7 @@ const Price = ({ product }: { product: ProductType }) => {
 
   const handleCart = () => {
     addToCart({ id: product.id, title: product.title, img: product.img, price: total, quantity: quantity });
-    toast.success("The Product added to the cart");
+    toast.success("Produk telah ditambahkan kedalam cart.");
   };
 
   return (

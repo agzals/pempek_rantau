@@ -64,7 +64,7 @@ const AddPage = () => {
     e.preventDefault();
     try {
       const url = await upload();
-      const res = await fetch("http://localhost:3000/api/products", {
+      const res = await fetch("https://pempekrantau.vercel.app/api/products", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

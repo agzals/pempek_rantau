@@ -48,7 +48,7 @@ const CartPage = () => {
     } else {
       // Validate if shipping address is filled
       if (!shippingAddress.address || !shippingAddress.city || !shippingAddress.pos) {
-        toast.error("Please fill out the shipping address before proceeding to payment.");
+        toast.error("Tolong isi Alamat Pengiriman sebelum menyelesaikan pembayaran.");
         return;
       }
 
@@ -143,7 +143,7 @@ const CartPage = () => {
             {item.img && <Image src={item.img} alt="" width={100} height={100} />}
             <div className="">
               <h1 className="uppercase text-xl font-bold">
-                {item.title} x{item.quantity}
+                {item.title} ({item.quantity})
               </h1>
             </div>
             <h2 className="font-bold">{formatToRupiah(item.price)}</h2>
@@ -156,7 +156,7 @@ const CartPage = () => {
       {/* SHIPPING ADDRESS FORM */}
       <div className="flex flex-col justify-center w-full lg:w-1/3 px-4 py-2 text-gray-800 bg-gray-200">
         <h2 className="text-lg font-semibold mb-2">Alamat Pengiriman</h2>
-        <input type="text" name="address" placeholder="Alamat" value={shippingAddress.address} onChange={handleAddressChange} className="border border-gray-300 rounded-md p-2 mb-2 focus:outline-none" />
+        <input type="text" name="address" placeholder="Alamat Lengkap" value={shippingAddress.address} onChange={handleAddressChange} className="border border-gray-300 rounded-md p-2 mb-2 focus:outline-none" />
         <input type="text" name="city" placeholder="Kota" value={shippingAddress.city} onChange={handleAddressChange} className="border border-gray-300 rounded-md p-2 mb-2 focus:outline-none" />
         <input type="text" name="pos" placeholder="Kode Pos" value={shippingAddress.pos} onChange={handleAddressChange} className="border border-gray-300 rounded-md p-2 mb-2 focus:outline-none" />
       </div>

@@ -33,7 +33,7 @@ const LoginPage = () => {
           </button>
           <p className="text-sm">
             Ada Masalah Sign in?
-            <Link className="underline" href="https://wa.me/085777192036" target="_blank" rel="noopener noreferrer">
+            <Link className="underline" href="https://wa.me/6285777192036" target="_blank" rel="noopener noreferrer">
               {" "}
               Kontak Kami
             </Link>

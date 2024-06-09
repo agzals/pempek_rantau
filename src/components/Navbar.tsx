@@ -13,7 +13,7 @@ const Navbar = () => {
       <div className="hidden md:flex gap-4 flex-1 text-white">
         <Link href="/">Homepage</Link>
         <Link href="/menu">Menu</Link>
-        <Link href="/">Contact</Link>
+        <Link href="/about">About Us</Link>
       </div>
       {/* LOGO */}
       <div className="flex-1 flex justify-center">

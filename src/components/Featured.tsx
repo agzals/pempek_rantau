@@ -1,21 +1,20 @@
+"use client";
 import { ProductType } from "@/types/types";
 import Image from "next/image";
 import React from "react";
+import { useRouter } from "next/navigation";
 
-const getData = async () => {
-  const res = await fetch("https://pempekrantau.vercel.app/api/products", {
-    cache: "no-store",
-  });
+interface FeaturedProps {
+  featuredProducts: ProductType[];
+}
 
-  if (!res.ok) {
-    throw new Error("Failed!");
-  }
+const Featured: React.FC<FeaturedProps> = ({ featuredProducts }) => {
+  const router = useRouter();
 
-  return res.json();
-};
+  const handleAddToCart = (id: string) => {
+    router.push(`https://pempekrantau.vercel.app/product/${id}`);
+  };
 
-const Featured = async () => {
-  const featuredProducts: ProductType[] = await getData();
   return (
     <div className="w-screen overflow-x-scroll bg-gray-100 text-gray-800">
       {/*WRAPPER*/}
@@ -35,7 +34,9 @@ const Featured = async () => {
               <h1 className="text-xl font-bold uppercase xl:text-l 2xl:text-xl">{item.title}</h1>
               <p className="text-sm p-4 2xl:p-8">{item.desc}</p>
               <span className="text-l font-bold">Rp.{item.price}</span>
-              <button className="bg-gray-800 w-50 text-white text-sm p-2 rounded-md">Add to Cart</button>
+              <button className="bg-gray-800 w-50 text-white text-sm p-2 rounded-md" onClick={() => handleAddToCart(item.id)}>
+                Add to Cart
+              </button>
             </div>
           </div>
         ))}
