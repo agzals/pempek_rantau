@@ -44,6 +44,24 @@ export const POST = async (req: NextRequest) => {
     if (!price || !products || !status || !userEmail || !address || !city || !pos) {
       return new NextResponse(JSON.stringify({ message: "Missing required fields" }), { status: 400 });
     }
+    const productUpdates = products.map(async (product: any) => {
+      const dbProduct = await prisma.product.findUnique({ where: { id: product.id } });
+
+      if (!dbProduct) {
+        throw new Error(`Product with ID ${product.id} not found`);
+      }
+
+      if (dbProduct.stock < product.quantity) {
+        throw new Error(`Insufficient stock for product ${product.title}`);
+      }
+
+      await prisma.product.update({
+        where: { id: product.id },
+        data: { stock: dbProduct.stock - product.quantity },
+      });
+    });
+
+    await Promise.all(productUpdates);
 
     // Create order for both admin and non-admin users
     const order = await prisma.order.create({

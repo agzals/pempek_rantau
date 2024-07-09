@@ -2,15 +2,17 @@
 import { OrderType } from "@/types/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import { format } from "date-fns";
 
 const OrdersPage = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<OrderType | null>(null);
+
   const formatDateTime = (dateTimeString: string) => {
-    return format(new Date(dateTimeString), "dd/MM/yyyy HH:mm:ss"); // Format the date and time to "dd/MM/yyyy HH:mm:ss" format
+    return format(new Date(dateTimeString), "dd/MM/yyyy HH:mm:ss");
   };
 
   const { data: session, status } = useSession();
@@ -20,25 +22,41 @@ const OrdersPage = () => {
     router.push("/");
   }
 
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    if (status === "authenticated") {
+      queryClient.invalidateQueries({ queryKey: ["orders"] });
+    }
+  }, [status, queryClient]);
+
   const { isLoading, error, data } = useQuery({
     queryKey: ["orders"],
     queryFn: () => fetch("https://pempekrantau.vercel.app/api/orders").then((res) => res.json()),
   });
 
-  const queryClient = useQueryClient();
-
   const mutation = useMutation({
     mutationFn: ({ id, status, trackingNumber }: { id: string; status: string; trackingNumber: string }) => {
-      return fetch(`https://pempekrantau.vercel.app/api/orders/${id}`, {
+      return fetch(`http://localhost:3000/api/orders/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ status, trackingNumber }),
+      }).then((res) => {
+        if (!res.ok) {
+          throw new Error("Network response was not ok");
+        }
+        return res.json();
       });
     },
     onSuccess() {
       queryClient.invalidateQueries({ queryKey: ["orders"] });
+      toast.success("The order status and tracking number have been changed!");
+    },
+    onError(error) {
+      console.error("Error updating order:", error);
+      toast.error("Failed to update order");
     },
   });
 
@@ -51,7 +69,6 @@ const OrdersPage = () => {
     const trackingNumber = trackingNumberInput.value;
 
     mutation.mutate({ id, status, trackingNumber });
-    toast.success("The order status and tracking number have been changed!");
   };
 
   const formatCurrency = (amount: number) => {
@@ -61,7 +78,19 @@ const OrdersPage = () => {
     }).format(amount);
   };
 
+  const openModal = (order: OrderType) => {
+    setSelectedOrder(order);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setSelectedOrder(null);
+    setIsModalOpen(false);
+  };
+
   if (isLoading || status === "loading") return "Loading...";
+
+  if (error) return <div>Error loading orders</div>;
 
   return (
     <div className="p-4 lg:px-20 xl:px-40">
@@ -75,6 +104,7 @@ const OrdersPage = () => {
               <th className="hidden md:table-cell">Products</th>
               <th>Status</th>
               <th className="text-left">Resi Pengiriman</th>
+              <th className="text-left">Detail</th>
             </tr>
           </thead>
           <tbody>
@@ -98,11 +128,60 @@ const OrdersPage = () => {
                     <td className="py-2 px-1">{item.trackingNumber}</td>
                   </>
                 )}
+                <td className="py-2 px-1">
+                  <button className="bg-blue-500 text-white p-2 rounded-md" onClick={() => openModal(item)}>
+                    Detail
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+
+      {isModalOpen && selectedOrder && (
+        <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white p-8 rounded-lg max-w-md w-full">
+            <h2 className="text-xl font-semibold mb-4">Detail Pemesanan</h2>
+            <p>
+              <strong>Order ID:</strong> {selectedOrder.id}
+            </p>
+            <p>
+              <strong>Email:</strong> {selectedOrder.userEmail}
+            </p>
+            <p>
+              <strong>Tanggal Pemesanan:</strong> {formatDateTime(selectedOrder.createdAt.toString())}
+            </p>
+            <p>
+              <strong>Harga:</strong> {formatCurrency(selectedOrder.price)}
+            </p>
+            <p>
+              <strong>Status:</strong> {selectedOrder.status}
+            </p>
+            <p>
+              <strong>Alamat Lengkap:</strong> {selectedOrder.address}
+            </p>
+            <p>
+              <strong>Kota:</strong> {selectedOrder.city}
+            </p>
+            <p>
+              <strong>Kode Pos:</strong> {selectedOrder.pos}
+            </p>
+            <p>
+              <strong>Resi Pengiriman:</strong> {selectedOrder.trackingNumber}
+            </p>
+            <h3 className="mt-4 font-semibold">Produk:</h3>
+            <ul className="list-disc list-inside">
+              {selectedOrder.products.map((product) => (
+                <li key={product.id}>{product.title}</li>
+              ))}
+            </ul>
+            <button className="bg-red-500 text-white p-2 rounded-md mt-4" onClick={closeModal}>
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

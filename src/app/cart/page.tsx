@@ -44,7 +44,7 @@ const CartPage = () => {
 
   const handleCheckout = async () => {
     if (!session) {
-      router.push("/");
+      router.push("https://pempekrantau.vercel.app/login");
     } else {
       // Validate if shipping address is filled
       if (!shippingAddress.address || !shippingAddress.city || !shippingAddress.pos) {
@@ -93,7 +93,7 @@ const CartPage = () => {
           customer_details: {
             email: session.user.email,
             shipping_address: {
-              address: shippingAddress.address,
+              address: "sudirman",
               city: shippingAddress.city,
               postal_code: shippingAddress.pos,
             },
@@ -102,7 +102,7 @@ const CartPage = () => {
         console.log("Gross amount:", orderData.transaction_details.gross_amount);
         console.log("detail:", orderData.item_details);
         console.log("Total with shipping:", totalWithShipping);
-
+        console.log("Order Data:", orderData);
         const itemDetailsSum = orderData.item_details.reduce((sum, item) => sum + item.price, 0);
         console.log("Item details sum:", itemDetailsSum);
 
