@@ -37,7 +37,7 @@ const OrdersPage = () => {
 
   const mutation = useMutation({
     mutationFn: ({ id, status, trackingNumber }: { id: string; status: string; trackingNumber: string }) => {
-      return fetch(`http://localhost:3000/api/orders/${id}`, {
+      return fetch(`https://pempekrantau.vercel.app/api/orders/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
