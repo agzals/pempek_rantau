@@ -22,24 +22,31 @@ const CartPage = () => {
     address: "",
     city: "",
     pos: "",
+    courier: "",
   });
+  const [formValid, setFormValid] = useState(false); // State to track form validity
 
   const calculateShippingCost = (quantity: number) => {
     if (quantity === 0) return 0;
-    return quantity <= 3 ? 10000 : 18000;
+    return quantity <= 3 ? 16000 : 24000;
   };
 
   const totalQuantity = products.reduce((sum, product) => sum + product.quantity, 0);
-  const shippingCost = calculateShippingCost(totalQuantity);
+  const shippingCost = shippingAddress.courier === "JNE (Yes)" ? calculateShippingCost(totalQuantity) : 0;
   const totalWithShipping = totalPrice + shippingCost;
 
   useEffect(() => {
     useCartStore.persist.rehydrate();
   }, []);
 
-  const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setShippingAddress({ ...shippingAddress, [name]: value });
+  };
+
+  const handleCourierChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const { value } = e.target;
+    setShippingAddress({ ...shippingAddress, courier: value });
   };
 
   const handleCheckout = async () => {
@@ -49,6 +56,12 @@ const CartPage = () => {
       // Validate if shipping address is filled
       if (!shippingAddress.address || !shippingAddress.city || !shippingAddress.pos) {
         toast.error("Tolong isi Alamat Pengiriman sebelum menyelesaikan pembayaran.");
+        return;
+      }
+
+      // Validate if courier is selected
+      if (!shippingAddress.courier) {
+        toast.error("Tolong pilih kurir pengiriman sebelum menyelesaikan pembayaran.");
         return;
       }
 
@@ -70,7 +83,7 @@ const CartPage = () => {
             pos: shippingAddress.pos,
           }),
         });
-        const i = 50000;
+
         const orderData = {
           transaction_details: {
             order_id: `order-${Date.now()}`,
@@ -93,25 +106,12 @@ const CartPage = () => {
           customer_details: {
             email: session.user.email,
             shipping_address: {
-              address: "sudirman",
+              address: shippingAddress.address,
               city: shippingAddress.city,
               postal_code: shippingAddress.pos,
             },
           },
         };
-        console.log("Gross amount:", orderData.transaction_details.gross_amount);
-        console.log("detail:", orderData.item_details);
-        console.log("Total with shipping:", totalWithShipping);
-        console.log("Order Data:", orderData);
-        const itemDetailsSum = orderData.item_details.reduce((sum, item) => sum + item.price, 0);
-        console.log("Item details sum:", itemDetailsSum);
-
-        if (totalWithShipping !== itemDetailsSum) {
-          console.error("Discrepancy detected:", totalWithShipping - itemDetailsSum);
-        } else {
-          console.log("Total with shipping:", totalWithShipping);
-          console.log("Item details sum:", itemDetailsSum);
-        }
 
         const res = await fetch("https://api.sandbox.midtrans.com/v1/payment-links", {
           method: "POST",
@@ -133,6 +133,11 @@ const CartPage = () => {
       }
     }
   };
+
+  // Update formValid state based on form completeness and quantity constraint
+  useEffect(() => {
+    setFormValid(!!shippingAddress.address && !!shippingAddress.city && !!shippingAddress.pos && !!shippingAddress.courier && totalQuantity <= 4);
+  }, [shippingAddress, totalQuantity]);
 
   return (
     <div className="h-[calc(100vh-6rem)] md:h-[calc(100vh-9rem)] flex flex-col text-gray-800 bg-gray-100 lg:flex-row">
@@ -156,9 +161,29 @@ const CartPage = () => {
       {/* SHIPPING ADDRESS FORM */}
       <div className="flex flex-col justify-center w-full lg:w-1/3 px-4 py-2 text-gray-800 bg-gray-200">
         <h2 className="text-lg font-semibold mb-2">Alamat Pengiriman</h2>
-        <input type="text" name="address" placeholder="Alamat Lengkap" value={shippingAddress.address} onChange={handleAddressChange} className="border border-gray-300 rounded-md p-2 mb-2 focus:outline-none" />
-        <input type="text" name="city" placeholder="Kota" value={shippingAddress.city} onChange={handleAddressChange} className="border border-gray-300 rounded-md p-2 mb-2 focus:outline-none" />
+        <textarea
+          name="address"
+          placeholder="Alamat Lengkap"
+          value={shippingAddress.address}
+          onChange={handleAddressChange}
+          className="border border-gray-300 rounded-md p-2 mb-2 focus:outline-none"
+          rows={4} // Menentukan tinggi textarea
+        />
+        <select name="city" value={shippingAddress.city} onChange={handleAddressChange} className="border border-gray-300 rounded-md p-2 mb-2 focus:outline-none">
+          <option value="">Pilih Kota</option>
+          <option value="Jakarta">Jakarta</option>
+          <option value="Bogor">Bogor</option>
+          <option value="Depok">Depok</option>
+          <option value="Tangerang">Tangerang</option>
+          <option value="Bekasi">Bekasi</option>
+        </select>
         <input type="text" name="pos" placeholder="Kode Pos" value={shippingAddress.pos} onChange={handleAddressChange} className="border border-gray-300 rounded-md p-2 mb-2 focus:outline-none" />
+        <select name="courier" value={shippingAddress.courier} onChange={handleCourierChange} className="border border-gray-300 rounded-md p-2 mb-2 focus:outline-none">
+          <option value="">Pilih Pengiriman</option>
+          <option value="JNE (Yes)">JNE (Yes) (est 1 hari)</option>
+        </select>
+        {!formValid && <p className="text-red-500 text-sm mt-2">Silakan lengkapi form Alamat Pengiriman dengan benar untuk melanjutkan pembayaran.</p>}
+        {totalQuantity > 4 && <p className="text-red-500 text-sm mt-2">Mohon maaf. Maksimal pembelian hanya 4 Produk.</p>}
       </div>
       {/* PAYMENT CONTAINER */}
       <div className="h-1/2 p-4 bg-gray-200 text-gray-800 flex flex-col gap-4 justify-center lg:h-full lg:w-1/2 2xl:w-1/3 lg:px-20 xl:px-40 2xl:text-xl 2xl:gap-6">
@@ -166,16 +191,22 @@ const CartPage = () => {
           <span className="">Subtotal</span>
           <span className="">{formatToRupiah(totalPrice)}</span>
         </div>
-        <div className="flex justify-between">
-          <span className="">Ongkos Kirim</span>
-          <span className="">{formatToRupiah(shippingCost)}</span>
-        </div>
+        {shippingAddress.courier === "JNE (Yes)" && (
+          <div className="flex justify-between">
+            <span className="">Ongkos Kirim</span>
+            <span className="">{formatToRupiah(shippingCost)}</span>
+          </div>
+        )}
         <hr className="my-2" />
         <div className="flex justify-between">
           <span className="">TOTAL HARGA</span>
           <span className="font-bold">{formatToRupiah(totalWithShipping)}</span>
         </div>
-        <button className="bg-gray-800 text-white p-3 rounded-md w-100% self-end" onClick={handleCheckout}>
+        <button
+          className={`bg-gray-800 text-white p-3 rounded-md w-full self-end ${formValid ? "" : "opacity-50 cursor-not-allowed"}`}
+          onClick={handleCheckout}
+          disabled={!formValid} // Disable button jika form tidak valid
+        >
           BAYAR
         </button>
       </div>

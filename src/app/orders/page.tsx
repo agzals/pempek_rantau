@@ -52,7 +52,7 @@ const OrdersPage = () => {
     },
     onSuccess() {
       queryClient.invalidateQueries({ queryKey: ["orders"] });
-      toast.success("The order status and tracking number have been changed!");
+      toast.success("Status Order dan Resi Pengiriman telah di update!");
     },
     onError(error) {
       console.error("Error updating order:", error);
