@@ -40,8 +40,8 @@ export const POST = async (req: NextRequest) => {
     const body = await req.json();
 
     // Validate the incoming data
-    const { price, products, status, userEmail, address, city, pos } = body;
-    if (!price || !products || !status || !userEmail || !address || !city || !pos) {
+    const { price, products, status, userEmail, address, city, pos, name, phoneNumber } = body;
+    if (!price || !products || !status || !userEmail || !address || !city || !pos || !name || !phoneNumber) {
       return new NextResponse(JSON.stringify({ message: "Missing required fields" }), { status: 400 });
     }
     const productUpdates = products.map(async (product: any) => {

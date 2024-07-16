@@ -16,6 +16,8 @@ export type ProductType = {
 };
 
 export type OrderType = {
+  name: string;
+  phoneNumber: string;
   id: string;
   address: string;
   city: string;
@@ -45,4 +47,5 @@ export type CartType = {
 export type ActionTypes = {
   addToCart: (item: CartItemType) => void;
   removeFromCart: (item: CartItemType) => void;
+  clearCart: () => void; // Add this line
 };

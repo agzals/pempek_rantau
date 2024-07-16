@@ -9,6 +9,7 @@ import { formatToRupiah } from "@/utils/formatToRupiah";
 const Price = ({ product }: { product: ProductType }) => {
   const [total, setTotal] = useState(product.price);
   const [quantity, setQuantity] = useState(1);
+  const [stock, setStock] = useState<number | null>(null);
 
   const { addToCart } = useCartStore();
 
@@ -20,9 +21,38 @@ const Price = ({ product }: { product: ProductType }) => {
     setTotal(quantity * product.price);
   }, [quantity, product]);
 
+  useEffect(() => {
+    const fetchStock = async () => {
+      try {
+        const response = await fetch(`http://localhost:3000/api/products/${product.id}`);
+        const data = await response.json();
+        setStock(data.stock);
+        if (quantity > data.stock) {
+          setQuantity(data.stock);
+        }
+      } catch (error) {
+        console.error("Failed to fetch stock information", error);
+      }
+    };
+
+    fetchStock();
+  }, [product.id, quantity]);
+
   const handleCart = () => {
     addToCart({ id: product.id, title: product.title, img: product.img, price: total, quantity: quantity });
     toast.success("Produk telah ditambahkan kedalam cart.");
+  };
+
+  const incrementQuantity = () => {
+    if (quantity < (stock || 0)) {
+      setQuantity((prev) => prev + 1);
+    }
+  };
+
+  const decrementQuantity = () => {
+    if (quantity > 1) {
+      setQuantity((prev) => prev - 1);
+    }
   };
 
   return (
@@ -34,14 +64,14 @@ const Price = ({ product }: { product: ProductType }) => {
         <div className="flex justify-between w-full p-3 ring-1 ring-gray-800">
           <span>Quantity</span>
           <div className="flex gap-4 items-center">
-            <button onClick={() => setQuantity((prev) => (prev > 1 ? prev - 1 : 1))}>{"<"}</button>
+            <button onClick={decrementQuantity}>{"<"}</button>
             <span>{quantity}</span>
-            <button onClick={() => setQuantity((prev) => (prev < 9 ? prev + 1 : 9))}>{">"}</button>
+            <button onClick={incrementQuantity}>{">"}</button>
           </div>
         </div>
         {/* CART BUTTON */}
-        <button className="uppercase w-56 bg-gray-800 text-white p-3 ring-1 ring-gray-800" onClick={handleCart}>
-          Add to Cart
+        <button className="uppercase w-56 bg-gray-800 text-white p-3 ring-1 ring-gray-800" onClick={handleCart} disabled={stock === 0}>
+          {stock === 0 ? "Out of Stock" : "Add to Cart"}
         </button>
       </div>
     </div>

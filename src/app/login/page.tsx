@@ -26,7 +26,7 @@ const LoginPage = () => {
         {/* FORM CONTAINER */}
         <div className="p-3 flex flex-col gap-8 md:w-1/2">
           <h1 className="font-bold text-xl xl:text-3xl">Selamat Datang!</h1>
-          <p>Silahkan Log in dengan akun google atau membuat akun baru.</p>
+          <p>Silahkan Log in dengan akun google.</p>
           <button className="flex gap-4 p-4 ring-1 ring-orange-100 rounded-md" onClick={() => signIn("google")}>
             <Image src="/google.png" alt="" width={20} height={20} className="object-contain" />
             <span>Sign in with Google</span>

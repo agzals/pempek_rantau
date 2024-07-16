@@ -61,7 +61,7 @@ const SingleProductPage = ({ params }: { params: { id: string } }) => {
         <h1 className="text-3xl font-bold uppercase xl:text-5xl">{singleProduct.title}</h1>
         <p>{singleProduct.desc}</p>
         {singleProduct.stock > 0 && <Price product={singleProduct} />}
-        <p className="text-xl font-semibold">Stock: {singleProduct.stock > 0 ? <span className="text-green-500">Tersedia</span> : <span className="text-red-500">Habis</span>}</p>
+        <p className="text-xl font-semibold">Stock: {singleProduct.stock > 0 ? <span className="text-green-500">Tersedia ({singleProduct.stock})</span> : <span className="text-red-500">Habis {singleProduct.stock}</span>}</p>
         {status === "authenticated" && session?.user.isAdmin && (
           <button onClick={handleAddProductClick} className="p-2 bg-red-500 text-white rounded">
             Tambah Produk Baru

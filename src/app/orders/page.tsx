@@ -10,6 +10,7 @@ import { format } from "date-fns";
 const OrdersPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<OrderType | null>(null);
+  const [searchQuery, setSearchQuery] = useState(""); // State untuk menyimpan nilai input pencarian
 
   const formatDateTime = (dateTimeString: string) => {
     return format(new Date(dateTimeString), "dd/MM/yyyy HH:mm:ss");
@@ -88,12 +89,21 @@ const OrdersPage = () => {
     setIsModalOpen(false);
   };
 
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  };
+
+  const filteredData = data?.filter((order: OrderType) => order.id.includes(searchQuery));
+
   if (isLoading || status === "loading") return "Loading...";
 
   if (error) return <div>Error loading orders</div>;
 
   return (
     <div className="p-4 lg:px-20 xl:px-40">
+      <div className="mb-4">
+        <input type="text" placeholder="Cari pesanan berdasarkan Order ID" value={searchQuery} onChange={handleSearchChange} className="w-full p-2 border border-gray-300 rounded-md" />
+      </div>
       <div className="overflow-x-auto">
         <table className="w-full border-separate border-spacing-2">
           <thead>
@@ -108,12 +118,22 @@ const OrdersPage = () => {
             </tr>
           </thead>
           <tbody>
-            {data.map((item: OrderType) => (
+            {filteredData?.map((item: OrderType) => (
               <tr className={`${item.status !== "delivered" && "bg-red-50"}`} key={item.id}>
                 <td className="hidden md:table-cell py-2 px-1">{item.id}</td>
                 <td className="py-2 px-1">{formatDateTime(item.createdAt.toString())}</td>
                 <td className="py-2 px-1">{formatCurrency(item.price)}</td>
-                <td className="hidden md:table-cell py-2 px-1">{item.products.length > 0 ? item.products[0].title : "No Product"}</td>
+                <td className="hidden md:table-cell py-2 px-1">
+                  {item.products.length > 0 ? (
+                    <ul>
+                      {item.products.map((product) => (
+                        <li key={product.id}>{product.title}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    "No Product"
+                  )}
+                </td>
                 {session?.user.isAdmin ? (
                   <td className="py-2 px-1">
                     <form className="flex flex-col md:flex-row items-center justify-center gap-2" onSubmit={(e) => handleUpdate(e, item.id)}>
@@ -147,6 +167,12 @@ const OrdersPage = () => {
               <strong>Order ID:</strong> {selectedOrder.id}
             </p>
             <p>
+              <strong>Nama Pemesan:</strong> {selectedOrder.name}
+            </p>
+            <p>
+              <strong>No.Telepon:</strong> {selectedOrder.phoneNumber}
+            </p>
+            <p>
               <strong>Email:</strong> {selectedOrder.userEmail}
             </p>
             <p>
@@ -173,7 +199,9 @@ const OrdersPage = () => {
             <h3 className="mt-4 font-semibold">Produk:</h3>
             <ul className="list-disc list-inside">
               {selectedOrder.products.map((product) => (
-                <li key={product.id}>{product.title}</li>
+                <li key={product.id}>
+                  {product.title} (x{product.quantity})
+                </li>
               ))}
             </ul>
             <button className="bg-red-500 text-white p-2 rounded-md mt-4" onClick={closeModal}>

@@ -100,4 +100,6 @@ model Order {
   trackingNumber String?
   user User @relation(fields: [userEmail], references: [email])
   userEmail String
+  name      String?
+  phoneNumber    String?
 }

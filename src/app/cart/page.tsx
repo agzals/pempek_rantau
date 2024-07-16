@@ -15,10 +15,12 @@ const formatToRupiah = (amount: number | null | undefined) => {
 };
 
 const CartPage = () => {
-  const { products, totalItems, totalPrice, removeFromCart } = useCartStore();
+  const { products, totalItems, totalPrice, removeFromCart, clearCart } = useCartStore();
   const { data: session } = useSession();
   const router = useRouter();
   const [shippingAddress, setShippingAddress] = useState({
+    name: "",
+    phoneNumber: "",
     address: "",
     city: "",
     pos: "",
@@ -54,7 +56,7 @@ const CartPage = () => {
       router.push("https://pempekrantau.vercel.app/login");
     } else {
       // Validate if shipping address is filled
-      if (!shippingAddress.address || !shippingAddress.city || !shippingAddress.pos) {
+      if (!shippingAddress.name || !shippingAddress.phoneNumber || !shippingAddress.address || !shippingAddress.city || !shippingAddress.pos) {
         toast.error("Tolong isi Alamat Pengiriman sebelum menyelesaikan pembayaran.");
         return;
       }
@@ -74,19 +76,23 @@ const CartPage = () => {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
+            id: `order-${Date.now()}`,
             price: totalWithShipping,
             products,
             status: "Belum Bayar",
             userEmail: session.user.email,
+            name: shippingAddress.name,
+            phoneNumber: shippingAddress.phoneNumber,
             address: shippingAddress.address,
             city: shippingAddress.city,
             pos: shippingAddress.pos,
           }),
         });
+        const { id: order_id } = await resp.json();
 
         const orderData = {
           transaction_details: {
-            order_id: `order-${Date.now()}`,
+            order_id: order_id,
             gross_amount: totalWithShipping,
           },
           item_details: [
@@ -105,6 +111,8 @@ const CartPage = () => {
           ],
           customer_details: {
             email: session.user.email,
+            first_name: shippingAddress.name,
+            phone: shippingAddress.phoneNumber,
             shipping_address: {
               address: shippingAddress.address,
               city: shippingAddress.city,
@@ -124,6 +132,7 @@ const CartPage = () => {
 
         const data = await res.json();
         if (data.payment_url) {
+          clearCart();
           router.push(data.payment_url);
         } else {
           console.error("Failed to create payment link", data);
@@ -136,7 +145,7 @@ const CartPage = () => {
 
   // Update formValid state based on form completeness and quantity constraint
   useEffect(() => {
-    setFormValid(!!shippingAddress.address && !!shippingAddress.city && !!shippingAddress.pos && !!shippingAddress.courier && totalQuantity <= 4);
+    setFormValid(!!shippingAddress.name && !!shippingAddress.phoneNumber && !!shippingAddress.address && !!shippingAddress.city && !!shippingAddress.pos && !!shippingAddress.courier && totalQuantity <= 4);
   }, [shippingAddress, totalQuantity]);
 
   return (
@@ -161,6 +170,8 @@ const CartPage = () => {
       {/* SHIPPING ADDRESS FORM */}
       <div className="flex flex-col justify-center w-full lg:w-1/3 px-4 py-2 text-gray-800 bg-gray-200">
         <h2 className="text-lg font-semibold mb-2">Alamat Pengiriman</h2>
+        <input type="text" name="name" placeholder="Nama Lengkap" value={shippingAddress.name} onChange={handleAddressChange} className="border border-gray-300 rounded-md p-2 mb-2 focus:outline-none" />
+        <input type="text" name="phoneNumber" placeholder="No Telepon" value={shippingAddress.phoneNumber} onChange={handleAddressChange} className="border border-gray-300 rounded-md p-2 mb-2 focus:outline-none" />
         <textarea
           name="address"
           placeholder="Alamat Lengkap"
