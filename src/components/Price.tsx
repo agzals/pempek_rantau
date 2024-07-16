@@ -24,7 +24,7 @@ const Price = ({ product }: { product: ProductType }) => {
   useEffect(() => {
     const fetchStock = async () => {
       try {
-        const response = await fetch(`http://localhost:3000/api/products/${product.id}`);
+        const response = await fetch(`https://pempekrantau.vercel.app/api/products/${product.id}`);
         const data = await response.json();
         setStock(data.stock);
         if (quantity > data.stock) {
