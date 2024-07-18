@@ -11,7 +11,7 @@ const Navbar = () => {
     <div className="text-sm h-12 bg-gray-800  p-4 flex items-center justify-between border-b-2 uppercase md:h-24 lg:px-20 xl:px-40" style={{ color: "#392929", borderBottomColor: "#392929" }}>
       {/* LEFT LINKS */}
       <div className="hidden md:flex gap-4 flex-1 text-white">
-        <Link href="/">Homepage</Link>
+        <Link href="/">Home</Link>
         <Link href="/menu">Menu</Link>
         <Link href="/about">About Us</Link>
       </div>

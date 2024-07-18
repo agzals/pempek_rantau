@@ -39,10 +39,9 @@ const Featured: React.FC<FeaturedProps> = ({ featuredProducts }) => {
             {/* TEXT CONTAINER */}
             <div className="flex-1 flex flex-col items-center justify-center text-center gap-4">
               <h1 className="text-xl font-bold uppercase xl:text-l 2xl:text-xl">{item.title}</h1>
-              <p className="text-sm p-4 2xl:p-8">{item.desc}</p>
               <span className="text-l font-bold">{formatRupiah(item.price)}</span>
               <button className="bg-gray-800 w-50 text-white text-sm p-2 rounded-md" onClick={() => handleAddToCart(item.id)}>
-                Add to Cart
+                Lihat Produk
               </button>
             </div>
           </div>

@@ -1,20 +1,20 @@
+// Imports dan state stateful components
 "use client";
-import { OrderType } from "@/types/types";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import React, { useState, useEffect } from "react";
+import { format } from "date-fns";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import React, { useState, useEffect } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
-import { format } from "date-fns";
+import { OrderType } from "@/types/types";
 
 const OrdersPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<OrderType | null>(null);
-  const [searchQuery, setSearchQuery] = useState(""); // State untuk menyimpan nilai input pencarian
-
-  const formatDateTime = (dateTimeString: string) => {
-    return format(new Date(dateTimeString), "dd/MM/yyyy HH:mm:ss");
-  };
+  const [searchQuery, setSearchQuery] = useState("");
+  const [orderToConfirm, setOrderToConfirm] = useState<string | null>(null);
+  const [selectedStatus, setSelectedStatus] = useState("");
 
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -37,7 +37,7 @@ const OrdersPage = () => {
   });
 
   const mutation = useMutation({
-    mutationFn: ({ id, status, trackingNumber }: { id: string; status: string; trackingNumber: string }) => {
+    mutationFn: ({ id, status, trackingNumber }: { id: string; status: string; trackingNumber?: string }) => {
       return fetch(`https://pempekrantau.vercel.app/api/orders/${id}`, {
         method: "PUT",
         headers: {
@@ -53,7 +53,7 @@ const OrdersPage = () => {
     },
     onSuccess() {
       queryClient.invalidateQueries({ queryKey: ["orders"] });
-      toast.success("Status Order dan Resi Pengiriman telah di update!");
+      toast.success("Status Order telah di update!");
     },
     onError(error) {
       console.error("Error updating order:", error);
@@ -70,6 +70,11 @@ const OrdersPage = () => {
     const trackingNumber = trackingNumberInput.value;
 
     mutation.mutate({ id, status, trackingNumber });
+  };
+
+  const handleStatusChange = (id: string, newStatus: string) => {
+    mutation.mutate({ id, status: newStatus });
+    closeConfirmModal();
   };
 
   const formatCurrency = (amount: number) => {
@@ -89,11 +94,70 @@ const OrdersPage = () => {
     setIsModalOpen(false);
   };
 
+  const openConfirmModal = (orderId: string) => {
+    setOrderToConfirm(orderId);
+    setIsConfirmModalOpen(true);
+  };
+
+  const closeConfirmModal = () => {
+    setOrderToConfirm(null);
+    setIsConfirmModalOpen(false);
+  };
+
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
 
-  const filteredData = data?.filter((order: OrderType) => order.id.includes(searchQuery));
+  const handleStatusFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedStatus(e.target.value);
+  };
+
+  const filteredData = data?.filter((order: OrderType) => {
+    return order.id.includes(searchQuery) && (selectedStatus === "" || order.status === selectedStatus);
+  });
+
+  const handlePrint = () => {
+    if (selectedOrder) {
+      const printContent = document.getElementById("printable-invoice");
+      const win = window.open("", "Print Invoice", "width=800,height=600");
+      if (win) {
+        win.document.write(`
+          <html>
+            <head>
+              <title>Invoice</title>
+              <style>
+                body {
+                  font-family: Arial, sans-serif;
+                  margin: 20px;
+                }
+                h2 {
+                  margin-bottom: 20px;
+                }
+                .order-details p {
+                  margin: 5px 0;
+                }
+                .products-list {
+                  margin-top: 20px;
+                }
+                .products-list ul {
+                  list-style: none;
+                  padding-left: 0;
+                }
+                .products-list li {
+                  margin-bottom: 10px;
+                }
+              </style>
+            </head>
+            <body>
+              ${printContent?.innerHTML}
+            </body>
+          </html>
+        `);
+        win.document.close();
+        win.print();
+      }
+    }
+  };
 
   if (isLoading || status === "loading") return "Loading...";
 
@@ -101,8 +165,15 @@ const OrdersPage = () => {
 
   return (
     <div className="p-4 lg:px-20 xl:px-40">
-      <div className="mb-4">
+      <div className="mb-4 flex gap-4">
         <input type="text" placeholder="Cari pesanan berdasarkan Order ID" value={searchQuery} onChange={handleSearchChange} className="w-full p-2 border border-gray-300 rounded-md" />
+        <select value={selectedStatus} onChange={handleStatusFilterChange} className="p-2 border border-gray-300 rounded-md">
+          <option value="">Semua Status</option>
+          <option value="Belum Bayar">Belum Bayar</option>
+          <option value="Diproses">Diproses</option>
+          <option value="Dikirim">Dikirim</option>
+          <option value="Pesanan Selesai">Pesanan Selesai</option>
+        </select>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full border-separate border-spacing-2">
@@ -121,7 +192,7 @@ const OrdersPage = () => {
             {filteredData?.map((item: OrderType) => (
               <tr className={`${item.status !== "delivered" && "bg-red-50"}`} key={item.id}>
                 <td className="hidden md:table-cell py-2 px-1">{item.id}</td>
-                <td className="py-2 px-1">{formatDateTime(item.createdAt.toString())}</td>
+                <td className="py-2 px-1">{format(new Date(item.createdAt), "dd/MM/yyyy HH:mm:ss")}</td>
                 <td className="py-2 px-1">{formatCurrency(item.price)}</td>
                 <td className="hidden md:table-cell py-2 px-1">
                   {item.products.length > 0 ? (
@@ -136,11 +207,15 @@ const OrdersPage = () => {
                 </td>
                 {session?.user.isAdmin ? (
                   <td className="py-2 px-1">
-                    <form className="flex flex-col md:flex-row items-center justify-center gap-2" onSubmit={(e) => handleUpdate(e, item.id)}>
-                      <input placeholder={item.status.toString()} className="p-2 ring-1 ring-red-100 rounded-md w-full md:w-32" />
-                      <input placeholder={item.trackingNumber || ""} className="p-2 ring-1 ring-red-100 rounded-md w-full md:w-32" />
-                      <button className="bg-red-400 p-2 rounded-full">ubah</button>
-                    </form>
+                    {item.status !== "Pesanan Selesai" ? (
+                      <form className="flex flex-col md:flex-row items-center justify-center gap-2" onSubmit={(e) => handleUpdate(e, item.id)}>
+                        <input placeholder={item.status.toString()} className="p-2 ring-1 ring-red-100 rounded-md w-full md:w-32" />
+                        <input placeholder={item.trackingNumber || ""} className="p-2 ring-1 ring-red-100 rounded-md w-full md:w-32" />
+                        <button className="bg-red-400 p-2 rounded-full">ubah</button>
+                      </form>
+                    ) : (
+                      <span>{item.status}</span>
+                    )}
                   </td>
                 ) : (
                   <>
@@ -163,50 +238,77 @@ const OrdersPage = () => {
         <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center">
           <div className="bg-white p-8 rounded-lg max-w-md w-full">
             <h2 className="text-xl font-semibold mb-4">Detail Pemesanan</h2>
-            <p>
-              <strong>Order ID:</strong> {selectedOrder.id}
-            </p>
-            <p>
-              <strong>Nama Pemesan:</strong> {selectedOrder.name}
-            </p>
-            <p>
-              <strong>No.Telepon:</strong> {selectedOrder.phoneNumber}
-            </p>
-            <p>
-              <strong>Email:</strong> {selectedOrder.userEmail}
-            </p>
-            <p>
-              <strong>Tanggal Pemesanan:</strong> {formatDateTime(selectedOrder.createdAt.toString())}
-            </p>
-            <p>
-              <strong>Harga:</strong> {formatCurrency(selectedOrder.price)}
-            </p>
-            <p>
-              <strong>Status:</strong> {selectedOrder.status}
-            </p>
-            <p>
-              <strong>Alamat Lengkap:</strong> {selectedOrder.address}
-            </p>
-            <p>
-              <strong>Kota:</strong> {selectedOrder.city}
-            </p>
-            <p>
-              <strong>Kode Pos:</strong> {selectedOrder.pos}
-            </p>
-            <p>
-              <strong>Resi Pengiriman:</strong> {selectedOrder.trackingNumber}
-            </p>
-            <h3 className="mt-4 font-semibold">Produk:</h3>
-            <ul className="list-disc list-inside">
-              {selectedOrder.products.map((product) => (
-                <li key={product.id}>
-                  {product.title} (x{product.quantity})
-                </li>
-              ))}
-            </ul>
-            <button className="bg-red-500 text-white p-2 rounded-md mt-4" onClick={closeModal}>
+            <div id="printable-invoice">
+              <p>
+                <strong>Order ID:</strong> {selectedOrder.id}
+              </p>
+              <p>
+                <strong>Nama Pemesan:</strong> {selectedOrder.name}
+              </p>
+              <p>
+                <strong>No.Telepon:</strong> {selectedOrder.phoneNumber}
+              </p>
+              <p>
+                <strong>Email:</strong> {selectedOrder.userEmail}
+              </p>
+              <p>
+                <strong>Tanggal Pemesanan:</strong> {format(new Date(selectedOrder.createdAt), "dd/MM/yyyy HH:mm:ss")}
+              </p>
+              <p>
+                <strong>Harga:</strong> {formatCurrency(selectedOrder.price)}
+              </p>
+              <p>
+                <strong>Status:</strong> {selectedOrder.status}
+              </p>
+              <p>
+                <strong>Alamat Lengkap:</strong> {selectedOrder.address}
+              </p>
+              <p>
+                <strong>Kota:</strong> {selectedOrder.city}
+              </p>
+              <p>
+                <strong>Kode Pos:</strong> {selectedOrder.pos}
+              </p>
+              <p>
+                <strong>Resi Pengiriman:</strong> {selectedOrder.trackingNumber}
+              </p>
+              <h3 className="mt-4 font-semibold">Produk:</h3>
+              <ul className="list-disc list-inside">
+                {selectedOrder.products.map((product) => (
+                  <li key={product.id}>
+                    {product.title} (x{product.quantity})
+                  </li>
+                ))}
+              </ul>
+            </div>
+            {!session?.user.isAdmin && selectedOrder.status === "Dikirim" && (
+              <button className="bg-green-500 text-white p-2 rounded-md mt-4" onClick={() => openConfirmModal(selectedOrder.id)}>
+                Pesanan Diterima
+              </button>
+            )}
+            <button className="bg-blue-500 text-white p-2 rounded-md mt-4" onClick={handlePrint}>
+              Cetak Invoice
+            </button>
+            <button className="bg-red-500 text-white p-2 rounded-md mt-4 ml-2" onClick={closeModal}>
               Close
             </button>
+          </div>
+        </div>
+      )}
+
+      {isConfirmModalOpen && orderToConfirm && (
+        <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white p-8 rounded-lg max-w-md w-full">
+            <h2 className="text-xl font-semibold mb-4">Konfirmasi Penerimaan</h2>
+            <p>Apakah Anda yakin sudah menerima produk kami?</p>
+            <div className="mt-4 flex justify-end">
+              <button className="bg-green-500 text-white p-2 rounded-md mr-2" onClick={() => handleStatusChange(orderToConfirm, "Pesanan Selesai")}>
+                Ya
+              </button>
+              <button className="bg-red-500 text-white p-2 rounded-md" onClick={closeConfirmModal}>
+                Tidak
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -14,9 +14,17 @@ const AboutPage = () => {
         <ol className="text-gray-700 text-left list-decimal list-inside">
           <li>Melakukan Sign in dengan akun Google.</li>
           <li>Menuju ke halaman menu.</li>
-          <li>Klik tambahkan produk ke cart.</li>
+          <li>Klik add to cart untuk menambahkan produk kedalam cart.</li>
           <li>Menuju ke halaman cart.</li>
-          <li>Lakukan pembayaran.</li>
+          <li>Melakukan pembayaran.</li>
+        </ol>
+
+        <h2 className="text-xl font-bold mb-2 mt-2">Status Pemesanan</h2>
+        <ol className="text-gray-700 text-left list-decimal list-inside">
+          <li>Belum Bayar : Lakukan Pembayaran Segera.</li>
+          <li>Diproses : Status Diproses jika pembayaran telah dikonfirmasi admin (10-20 menit). </li>
+          <li>Dikirim : Status Dikirim jika produk telah dikirim melalui jasa pengiriman.</li>
+          <li>Diterima Pembeli: Status Diterima Pembeli jika pembeli sudah mengklik pesanan diterima.</li>
         </ol>
       </div>
     </div>

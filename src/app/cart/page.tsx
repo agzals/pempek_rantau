@@ -193,7 +193,7 @@ const CartPage = () => {
           <option value="">Pilih Pengiriman</option>
           <option value="JNE (Yes)">JNE (Yes) (est 1 hari)</option>
         </select>
-        {!formValid && <p className="text-red-500 text-sm mt-2">Silakan lengkapi form Alamat Pengiriman dengan benar untuk melanjutkan pembayaran.</p>}
+        {!formValid && <p className="text-red-500 text-sm mt-2">Lengkapi form Alamat Pengiriman dengan benar.</p>}
         {totalQuantity > 4 && <p className="text-red-500 text-sm mt-2">Mohon maaf. Maksimal pembelian hanya 4 Produk.</p>}
       </div>
       {/* PAYMENT CONTAINER */}

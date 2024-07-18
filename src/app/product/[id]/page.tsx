@@ -60,7 +60,8 @@ const SingleProductPage = ({ params }: { params: { id: string } }) => {
       <div className="h-1/2 flex flex-col gap-4 md:h-[70%] md:justify-center md:gap-6 xl:gap-8">
         <h1 className="text-3xl font-bold uppercase xl:text-5xl">{singleProduct.title}</h1>
         <p>{singleProduct.desc}</p>
-        {singleProduct.stock > 0 && <Price product={singleProduct} />}
+        {/* Display Price component only if user is not admin */}
+        {!session?.user.isAdmin && singleProduct.stock > 0 && <Price product={singleProduct} />}
         <p className="text-xl font-semibold">Stock: {singleProduct.stock > 0 ? <span className="text-green-500">Tersedia ({singleProduct.stock})</span> : <span className="text-red-500">Habis {singleProduct.stock}</span>}</p>
         {status === "authenticated" && session?.user.isAdmin && (
           <button onClick={handleAddProductClick} className="p-2 bg-red-500 text-white rounded">
